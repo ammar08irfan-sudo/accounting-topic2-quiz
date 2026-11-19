@@ -3,16 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Topic 2: Cost — Concept, Classification & Component | Light Edition</title>
+<title>Cost Tycoon: Factory Ledger Challenge | Topic 02 Game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg-base: #f8fafc;
-    --bg-warm: #fefcf6;
-    --glass: rgba(255, 255, 255, 0.94);
-    --glass-card: #ffffff;
+    --glass: rgba(255, 255, 255, 0.96);
     --gold-primary: #b45309;
     --gold-accent: #d97706;
     --gold-soft: #fef3c7;
@@ -24,139 +22,294 @@
     --emerald-bg: #ecfdf5;
     --crimson: #e11d48;
     --crimson-bg: #fff1f2;
+    --indigo: #4338ca;
+    --indigo-bg: #eef2ff;
   }
 
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    user-select: none;
   }
 
   body {
     background-color: var(--bg-base);
     background-image:
-      radial-gradient(circle at 12% 15%, rgba(251, 191, 36, 0.16) 0%, transparent 45%),
-      radial-gradient(circle at 88% 85%, rgba(59, 130, 246, 0.10) 0%, transparent 50%),
-      linear-gradient(135deg, #fdfbf7 0%, #f1f5f9 100%);
+      radial-gradient(circle at 12% 15%, rgba(251, 191, 36, 0.20) 0%, transparent 45%),
+      radial-gradient(circle at 88% 85%, rgba(59, 130, 246, 0.14) 0%, transparent 50%),
+      linear-gradient(135deg, #fdfbf7 0%, #eff6ff 100%);
     color: var(--text-main);
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 24px;
+    padding: 20px;
     overflow-x: hidden;
   }
 
+  /* Animated ambient factory grid */
   body::before {
     content: "";
     position: fixed;
-    inset: 0;
+    inset: -44px;
     background-image: linear-gradient(rgba(180, 83, 9, 0.045) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(180, 83, 9, 0.045) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background-size: 44px 44px;
+    animation: gridDrift 18s linear infinite;
     pointer-events: none;
     z-index: 0;
   }
 
-  .luxury-frame {
+  @keyframes gridDrift {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(44px, 44px, 0); }
+  }
+
+  .game-shell {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 780px;
+    max-width: 840px;
     background: var(--glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1.5px solid var(--gold-border);
-    border-radius: 24px;
-    padding: 40px 44px;
+    border-radius: 26px;
+    padding: 34px 38px;
     box-shadow:
-      0 24px 60px rgba(15, 23, 42, 0.09),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      0 0 36px rgba(217, 119, 6, 0.06);
+      0 24px 60px rgba(15, 23, 42, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    animation: shellEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 0.15s ease, box-shadow 0.25s ease;
   }
 
-  .luxury-frame::after {
-    content: "";
-    position: absolute;
-    inset: 10px;
-    border: 1px solid rgba(180, 83, 9, 0.12);
-    border-radius: 16px;
+  @keyframes shellEnter {
+    from { opacity: 0; transform: translateY(18px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .screen-fade {
+    animation: screenFadeIn 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes screenFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .shake {
+    animation: shakeAnim 0.38s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shakeAnim {
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(4px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+    40%, 60% { transform: translate3d(6px, 0, 0); }
+  }
+
+  /* Floating score / life popup */
+  .score-popup {
+    position: fixed;
+    top: 22%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 50;
     pointer-events: none;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--emerald);
+    background: #ecfdf5;
+    border: 1.5px solid rgba(5, 150, 105, 0.35);
+    padding: 8px 18px;
+    border-radius: 999px;
+    box-shadow: 0 12px 24px rgba(5, 150, 105, 0.18);
+    animation: floatScore 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .top-ribbon {
+  .score-popup.life-lost {
+    color: var(--crimson);
+    background: var(--crimson-bg);
+    border-color: rgba(225, 29, 72, 0.35);
+    box-shadow: 0 12px 24px rgba(225, 29, 72, 0.16);
+  }
+
+  @keyframes floatScore {
+    0% { opacity: 0; transform: translate(-50%, 10px) scale(0.85); }
+    20% { opacity: 1; transform: translate(-50%, -4px) scale(1.06); }
+    100% { opacity: 0; transform: translate(-50%, -46px) scale(0.96); }
+  }
+
+  /* HUD BAR */
+  .hud-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
-    gap: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  }
+
+  .hud-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     flex-wrap: wrap;
   }
 
-  .pill-gold {
+  .hud-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #fef3c7, #fffbeb);
-    border: 1px solid var(--gold-border);
+    gap: 6px;
+    padding: 6px 13px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .badge-pop {
+    animation: badgeBounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes badgeBounce {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
+  .badge-stage {
+    background: #fef3c7;
     color: var(--gold-primary);
-    font-size: 0.78rem;
+    border: 1px solid rgba(180, 83, 9, 0.25);
+  }
+
+  .badge-hearts {
+    background: #fff1f2;
+    color: var(--crimson);
+    border: 1px solid rgba(225, 29, 72, 0.2);
+    font-size: 0.92rem;
+    letter-spacing: 1px;
+  }
+
+  .badge-hearts.low-life {
+    background: #ffe4e6;
+    border-color: rgba(225, 29, 72, 0.5);
+    animation: timerPulse 0.7s ease-in-out infinite;
+  }
+
+  .badge-combo {
+    background: #eef2ff;
+    color: var(--indigo);
+    border: 1px solid rgba(67, 56, 202, 0.2);
+  }
+
+  .badge-combo.hot {
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.14);
+    animation: comboPulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes comboPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+
+  .badge-score {
+    background: #ecfdf5;
+    color: var(--emerald);
+    border: 1px solid rgba(5, 150, 105, 0.25);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sound-btn {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 6px 11px;
+    cursor: pointer;
+    font-size: 0.9rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
   }
+  .sound-btn:hover { background: #fef3c7; border-color: var(--gold-accent); transform: translateY(-1px); }
+  .sound-btn:active { transform: scale(0.96); }
 
-  .score-pill {
-    padding: 7px 18px;
+  /* TIMER BAR */
+  .timer-wrap {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
     border-radius: 999px;
-    background: #ffffff;
-    border: 1.5px solid var(--gold-border);
-    color: var(--gold-primary);
-    font-weight: 800;
-    font-size: 0.88rem;
-    letter-spacing: 0.04em;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+    margin-bottom: 22px;
   }
 
-  .serif-title {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 2.15rem;
+  .timer-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #10b981, #f59e0b);
+    transition: width 0.12s linear, background-color 0.3s ease;
+  }
+
+  .timer-fill.danger {
+    background: linear-gradient(90deg, #e11d48, #f43f5e);
+    animation: timerPulse 0.55s ease-in-out infinite;
+  }
+
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+  }
+
+  /* START SCREEN */
+  .hero-title {
+    font-size: 2.2rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
-    line-height: 1.18;
-    background: linear-gradient(135deg, #0f172a 15%, #92400e 65%, #d97706 100%);
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #0f172a 15%, #92400e 60%, #d97706 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .subtitle {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 0.98rem;
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
 
   .author-card {
     display: grid;
     grid-template-columns: 1.25fr 1fr;
     align-items: center;
-    gap: 18px;
-    padding: 18px 22px;
-    border-radius: 14px;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 16px;
     background: linear-gradient(135deg, #fffbeb 0%, #fefce8 60%, #ffffff 100%);
     border: 1.5px solid rgba(217, 119, 6, 0.3);
-    margin-bottom: 28px;
-    box-shadow: 0 4px 14px rgba(180, 83, 9, 0.05);
+    margin-bottom: 22px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .author-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(180, 83, 9, 0.08);
   }
 
   .author-right {
     text-align: right;
     border-left: 1.5px solid rgba(180, 83, 9, 0.2);
-    padding-left: 18px;
+    padding-left: 16px;
   }
 
   @media (max-width: 680px) {
@@ -166,139 +319,406 @@
       border-left: none;
       border-top: 1.5px solid rgba(180, 83, 9, 0.2);
       padding-left: 0;
-      padding-top: 12px;
+      padding-top: 10px;
     }
   }
 
   .author-label {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--gold-primary);
     font-weight: 800;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
 
   .author-name {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 1.06rem;
+    font-size: 1.02rem;
     font-weight: 800;
-    letter-spacing: 0.02em;
     color: var(--text-main);
   }
 
   .author-meta {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     font-weight: 600;
   }
 
-  .feature-grid {
+  .stages-preview {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 14px;
-    margin-bottom: 30px;
-  }
-
-  .feature-box {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 16px 18px;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
-    transition: border-color 0.25s ease, transform 0.2s ease;
-  }
-
-  .feature-box:hover {
-    border-color: var(--gold-accent);
-    transform: translateY(-1px);
-  }
-
-  .feature-box strong {
-    display: block;
-    color: var(--gold-primary);
-    font-size: 0.92rem;
-    font-weight: 800;
-    margin-bottom: 4px;
-    letter-spacing: 0.02em;
-  }
-
-  .feature-box span {
-    color: var(--text-secondary);
-    font-size: 0.84rem;
-  }
-
-  .progress-track {
-    width: 100%;
-    height: 7px;
-    background: #e2e8f0;
-    border-radius: 999px;
-    overflow: hidden;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
     margin-bottom: 26px;
   }
 
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #b45309, #d97706, #f59e0b);
-    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  @media (max-width: 680px) {
+    .stages-preview { grid-template-columns: 1fr; }
   }
 
-  .section-eyebrow {
+  .stage-card {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px;
+    transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.24s ease, box-shadow 0.24s ease;
+  }
+
+  .stage-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--gold-accent);
+    box-shadow: 0 12px 24px rgba(180, 83, 9, 0.10);
+  }
+
+  .stage-num {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold-primary);
+    margin-bottom: 4px;
+  }
+
+  .stage-card h3 {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  .stage-card p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 55%, #b45309 100%);
+    color: #ffffff;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 0.96rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 14px;
+    padding: 15px 32px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(180, 83, 9, 0.25);
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, filter 0.2s ease;
+  }
+
+  .btn-primary::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 65%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.55s ease;
+  }
+
+  .btn-primary:hover::after {
+    left: 140%;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(180, 83, 9, 0.35);
+    filter: brightness(1.04);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* STAGE 1: FACTORY CONVEYOR SORTER */
+  .sorter-arena {
+    text-align: center;
+  }
+
+  .conveyor-track {
+    position: relative;
+    overflow: hidden;
+    padding: 8px 0 14px;
+  }
+
+  .conveyor-track::after {
+    content: "";
+    display: block;
+    max-width: 520px;
+    height: 4px;
+    margin: 12px auto 0;
+    border-radius: 999px;
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(180, 83, 9, 0.35) 0px,
+      rgba(180, 83, 9, 0.35) 14px,
+      transparent 14px,
+      transparent 28px
+    );
+    background-size: 56px 4px;
+    animation: beltMove 1.4s linear infinite;
+  }
+
+  @keyframes beltMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 56px 0; }
+  }
+
+  .conveyor-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+    border: 2px solid var(--gold-accent);
+    border-radius: 20px;
+    padding: 24px 20px;
+    margin: 6px auto 8px;
+    max-width: 520px;
+    box-shadow: 0 12px 28px rgba(180, 83, 9, 0.12);
+    animation: conveyorSlide 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes conveyorSlide {
+    0% { opacity: 0; transform: translateX(64px) scale(0.95); }
+    70% { opacity: 1; transform: translateX(-6px) scale(1.01); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  .item-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gold-primary);
+    background: #fef3c7;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+
+  .item-name {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  .item-amount {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--gold-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bins-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 680px) {
+    .bins-grid { grid-template-columns: 1fr; }
+  }
+
+  .bin-btn {
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 18px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: center;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  }
+
+  .bin-btn:hover:not(:disabled) {
+    transform: translateY(-4px);
+    border-color: var(--gold-accent);
+    background: #fffbeb;
+    box-shadow: 0 10px 22px rgba(180, 83, 9, 0.14);
+  }
+
+  .bin-btn:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  .bin-btn strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+
+  .bin-btn span {
     font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .bin-btn.bin-correct {
+    background: var(--emerald-bg);
+    border-color: var(--emerald);
+    animation: correctPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .bin-btn.bin-wrong {
+    background: var(--crimson-bg);
+    border-color: var(--crimson);
+  }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+
+  /* STAGE 2 & 3: CONCEPT RAPID FIRE & LEDGER BOSS */
+  .section-eyebrow {
+    font-size: 0.76rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--gold-primary);
     font-weight: 800;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .question-heading {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 1.38rem;
+    font-size: 1.32rem;
     font-weight: 800;
-    letter-spacing: -0.01em;
     line-height: 1.4;
     color: var(--text-main);
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    animation: textSlideIn 0.28s ease-out;
   }
+
+  @keyframes textSlideIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ref-box {
+    background: #fffbeb;
+    border: 1.5px solid rgba(217, 119, 6, 0.3);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    animation: textSlideIn 0.32s ease-out;
+  }
+
+  .ref-title {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold-primary);
+    font-weight: 800;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(180, 83, 9, 0.18);
+  }
+
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 5px 16px;
+    font-size: 0.8rem;
+  }
+
+  .ref-grid div {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    border-bottom: 1px dashed rgba(180, 83, 9, 0.18);
+  }
+
+  .ref-grid span { color: var(--text-secondary); font-weight: 500; }
+  .ref-grid strong { color: var(--text-main); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .tip-row { margin-bottom: 14px; }
+  .btn-tip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef3c7;
+    border: 1px solid rgba(180, 83, 9, 0.35);
+    color: var(--gold-primary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 7px 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-tip:hover { background: #fde68a; transform: translateY(-1px); }
+
+  .tip-box {
+    margin-top: 8px;
+    padding: 12px 15px;
+    border-radius: 12px;
+    background: #fffbeb;
+    border: 1.5px dashed rgba(217, 119, 6, 0.45);
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .tip-box.show {
+    display: block;
+    animation: tipReveal 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes tipReveal {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .tip-box strong { color: var(--gold-primary); }
 
   .options-stack {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 11px;
   }
 
   .option-card {
-    position: relative;
-    z-index: 2;
     background: #ffffff;
     color: var(--text-main);
     border: 1.5px solid #cbd5e1;
     border-radius: 14px;
-    padding: 15px 18px;
+    padding: 14px 17px;
     text-align: left;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 0.94rem;
     font-weight: 500;
-    line-height: 1.5;
+    line-height: 1.48;
     cursor: pointer;
     display: flex;
     align-items: flex-start;
-    gap: 14px;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-    transition: all 0.2s ease;
+    gap: 13px;
+    opacity: 0;
+    animation: optionStagger 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .option-card:nth-child(1) { animation-delay: 0.04s; }
+  .option-card:nth-child(2) { animation-delay: 0.09s; }
+  .option-card:nth-child(3) { animation-delay: 0.14s; }
+  .option-card:nth-child(4) { animation-delay: 0.19s; }
+
+  @keyframes optionStagger {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
   }
 
   .option-card:hover:not(:disabled) {
     background: #fffbeb;
     border-color: var(--gold-accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(180, 83, 9, 0.10);
-  }
-
-  .option-card:disabled {
-    cursor: default;
+    transform: translateX(4px);
+    box-shadow: 0 6px 16px rgba(180, 83, 9, 0.10);
   }
 
   .option-card.correct {
@@ -306,7 +726,7 @@
     border-color: var(--emerald);
     color: #064e3b;
     font-weight: 600;
-    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.12);
+    animation: correctPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .option-card.wrong {
@@ -320,274 +740,257 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 28px;
-    height: 28px;
+    min-width: 27px;
+    height: 27px;
     border-radius: 8px;
     background: #fef3c7;
     border: 1px solid rgba(180, 83, 9, 0.3);
     color: var(--gold-primary);
     font-weight: 800;
-    font-size: 0.82rem;
-    margin-top: 1px;
+    font-size: 0.8rem;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
-  .option-card.correct .opt-badge {
-    background: var(--emerald);
-    border-color: var(--emerald);
-    color: #ffffff;
-  }
+  .option-card.correct .opt-badge { background: var(--emerald); border-color: var(--emerald); color: #fff; }
+  .option-card.wrong .opt-badge { background: var(--crimson); border-color: var(--crimson); color: #fff; }
 
-  .option-card.wrong .opt-badge {
-    background: var(--crimson);
-    border-color: var(--crimson);
-    color: #ffffff;
-  }
-
-  .explanation-panel {
-    margin-top: 20px;
-    padding: 16px 20px;
+  .feedback-toast {
+    margin-top: 16px;
+    padding: 14px 18px;
     border-radius: 14px;
     background: #f8fafc;
     border-left: 4px solid var(--gold-accent);
     border-top: 1px solid #e2e8f0;
     border-right: 1px solid #e2e8f0;
     border-bottom: 1px solid #e2e8f0;
-    font-size: 0.92rem;
-    line-height: 1.6;
+    font-size: 0.9rem;
+    line-height: 1.55;
     color: var(--text-secondary);
     display: none;
-    animation: fadeSlide 0.3s ease;
   }
-
-  .explanation-panel.show {
+  .feedback-toast.show {
     display: block;
+    animation: toastSlideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  @keyframes fadeSlide {
-    from { opacity: 0; transform: translateY(6px); }
+  @keyframes toastSlideUp {
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   .action-row {
-    margin-top: 26px;
+    margin-top: 20px;
     display: flex;
     justify-content: flex-end;
-    position: relative;
-    z-index: 2;
   }
 
-  .btn-gold {
-    position: relative;
-    z-index: 2;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 55%, #b45309 100%);
-    color: #ffffff;
-    font-family: inherit;
-    font-weight: 800;
-    font-size: 0.95rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 12px;
-    padding: 14px 30px;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(180, 83, 9, 0.25);
-    transition: all 0.25s ease;
-  }
-
-  .btn-gold:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(180, 83, 9, 0.35);
-    filter: brightness(1.04);
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  .result-center {
+  /* STAGE BANNER TRANSITION */
+  .stage-banner {
     text-align: center;
+    padding: 28px 18px;
   }
 
-  .trophy-score {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 3.8rem;
+  .rank-pill {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 999px;
+    background: #fef3c7;
+    border: 1.5px solid var(--gold-accent);
+    color: var(--gold-primary);
+    font-weight: 800;
+    font-size: 0.92rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    animation: badgeBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .big-pts {
+    font-size: 3.4rem;
     font-weight: 800;
     background: linear-gradient(135deg, #0f172a 15%, #b45309 65%, #d97706 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin: 14px 0 6px;
+    margin: 8px 0;
+    animation: scoreZoom 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes scoreZoom {
+    from { opacity: 0; transform: scale(0.82); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 22px 0 26px;
+  }
+
+  .stat-box {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .stat-box:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold-accent);
+  }
+  .stat-box strong {
+    display: block;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--gold-primary);
+  }
+  .stat-box span {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
   }
 
   .footer-signature {
-    margin-top: 28px;
-    padding-top: 16px;
+    margin-top: 24px;
+    padding-top: 14px;
     border-top: 1px solid #e2e8f0;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
-    letter-spacing: 0.03em;
     text-align: center;
-    line-height: 1.6;
-  }
-
-  .footer-signature strong {
-    color: var(--gold-primary);
-    font-weight: 700;
-  }
-
-  .ref-box {
-    background: #fffbeb;
-    border: 1.5px solid rgba(217, 119, 6, 0.3);
-    border-radius: 14px;
-    padding: 14px 18px;
-    margin-bottom: 18px;
-  }
-
-  .ref-title {
-    font-size: 0.76rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--gold-primary);
-    font-weight: 800;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid rgba(180, 83, 9, 0.18);
-  }
-
-  .ref-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
-    gap: 6px 18px;
-    font-size: 0.82rem;
-  }
-
-  .ref-grid div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3px 0;
-    border-bottom: 1px dashed rgba(180, 83, 9, 0.18);
-  }
-
-  .ref-grid span { color: var(--text-secondary); font-weight: 500; }
-  .ref-grid strong { color: var(--text-main); font-weight: 700; font-variant-numeric: tabular-nums; }
-
-  .tip-row {
-    margin-bottom: 18px;
-  }
-
-  .btn-tip {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: #fef3c7;
-    border: 1px solid rgba(180, 83, 9, 0.35);
-    color: var(--gold-primary);
-    font-family: inherit;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    padding: 8px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-tip:hover {
-    background: #fde68a;
-    border-color: var(--gold-primary);
-  }
-
-  .tip-box {
-    margin-top: 10px;
-    padding: 13px 16px;
-    border-radius: 12px;
-    background: #fffbeb;
-    border: 1.5px dashed rgba(217, 119, 6, 0.45);
-    color: var(--text-secondary);
-    font-size: 0.88rem;
     line-height: 1.55;
-    display: none;
-    animation: fadeSlide 0.25s ease;
   }
+  .footer-signature strong { color: var(--gold-primary); font-weight: 700; }
 
-  .tip-box.show {
-    display: block;
-  }
+  .hidden { display: none !important; }
 
-  .tip-box strong {
-    color: var(--gold-primary);
-  }
-
-  @media (max-width: 600px) {
-    .luxury-frame { padding: 26px 20px; }
-    .serif-title { font-size: 1.85rem; }
-    .question-heading { font-size: 1.25rem; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
 </head>
 <body>
 
-<div class="luxury-frame">
+<div class="game-shell" id="game-shell">
   <!-- START SCREEN -->
-  <div id="start-screen">
-    <div class="top-ribbon">
-      <span class="pill-gold">✦ Management Accounting • Topic 02</span>
-      <span class="score-pill">10 Modules</span>
+  <div id="start-screen" class="screen-fade">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+      <span class="hud-badge badge-stage">🎮 Management Accounting • Topic 02 Game</span>
+      <button type="button" class="sound-btn" id="sound-toggle-start" onclick="toggleSound()">🔊 Sound: ON</button>
     </div>
 
-    <h1 class="serif-title">Cost: Concept, Classification &amp; Component</h1>
-    <p class="subtitle">An interactive executive assessment covering Sections 2.1 – 2.8 and Worked Examples 1–5.</p>
+    <h1 class="hero-title">Cost Tycoon: Factory Ledger Challenge</h1>
+    <p class="subtitle">Master Topic 2 (Concept, Classification &amp; Component) across 3 interactive game stages with live combos, speed bonuses, and 5 factory lives.</p>
 
     <div class="author-card">
       <div>
         <div class="author-label">Prepared By</div>
         <div class="author-name">MUHAMMAD AMMAR IRFAN BIN ARIF</div>
-        <div class="author-meta" style="margin-top: 3px;">CLASS A5 • SESSION 2026/2027 • JOHOR MATRICULATION COLLEGE</div>
+        <div class="author-meta" style="margin-top: 2px;">CLASS A5 • SESSION 2026/2027 • JOHOR MATRICULATION COLLEGE</div>
       </div>
       <div class="author-right">
         <div class="author-label">Lecturer</div>
-        <div class="author-name" style="font-size: 1.04rem; font-weight: 800; letter-spacing: 0.02em; color: var(--gold-primary);">PN. ZUBAIDAH BINTI MOHAMAD</div>
+        <div class="author-name" style="font-size: 1rem; color: var(--gold-primary);">PN. ZUBAIDAH BINTI MOHAMAD</div>
       </div>
     </div>
 
-    <div class="feature-grid">
-      <div class="feature-box">
-        <strong>Comprehensive Scope</strong>
-        <span>Theory, Cost Behaviour &amp; RM Computation Drills</span>
+    <div class="stages-preview">
+      <div class="stage-card">
+        <div class="stage-num">Stage 01 • Conveyor Sort</div>
+        <h3>Cost Classifier</h3>
+        <p>Sort 6 live factory &amp; office items into Prime Cost, Mfg Overhead, or Period Cost before time runs out.</p>
       </div>
-      <div class="feature-box">
-        <strong>Instant Precision</strong>
-        <span>Concept tips &amp; detailed accounting rationale</span>
+      <div class="stage-card">
+        <div class="stage-num">Stage 02 • Concept Sprint</div>
+        <h3>Theory &amp; Behaviour</h3>
+        <p>Rapid-fire challenges on Fixed vs Variable behaviour, Conversion Costs, and Management functions.</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-num">Stage 03 • Final Audit</div>
+        <h3>RM Ledger Boss</h3>
+        <p>5 connected Worked Example RM calculations to close the Statement of COGM &amp; Profit or Loss.</p>
       </div>
     </div>
 
-    <button class="btn-gold" onclick="startQuiz()">Begin Assessment →</button>
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;">
+      <span style="font-size:0.84rem; font-weight:700; color:var(--text-secondary);">❤️❤️❤️❤️❤️ 5 Lives &nbsp;•&nbsp; 🔥 Streak Multipliers (up to 3x) &nbsp;•&nbsp; ⚡ Speed Bonus</span>
+      <button class="btn-primary" onclick="startGame()">Start Game ▶</button>
+    </div>
   </div>
 
-  <!-- QUIZ SCREEN -->
-  <div id="quiz-screen" class="hidden">
-    <div class="top-ribbon">
-      <span class="pill-gold" id="q-counter">Question 01 / 10</span>
-      <span class="score-pill" id="score-display">Score: 0</span>
+  <!-- ACTIVE GAME SCREEN -->
+  <div id="play-screen" class="hidden screen-fade">
+    <div class="hud-bar">
+      <div class="hud-group">
+        <span class="hud-badge badge-stage" id="hud-stage">STAGE 1 / 3</span>
+        <span class="hud-badge badge-hearts" id="hud-hearts">❤️❤️❤️❤️❤️ (5/5)</span>
+      </div>
+      <div class="hud-group">
+        <span class="hud-badge badge-combo" id="hud-combo">🔥 1x Combo</span>
+        <span class="hud-badge badge-score" id="hud-score">0 PTS</span>
+        <button type="button" class="sound-btn" id="sound-toggle-hud" onclick="toggleSound()">🔊</button>
+      </div>
     </div>
 
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-bar"></div>
+    <div class="timer-wrap">
+      <div class="timer-fill" id="timer-bar"></div>
     </div>
 
-    <div class="section-eyebrow" id="section-tag"></div>
-    <h2 class="question-heading" id="question-text"></h2>
-    <div id="ref-container"></div>
-    <div class="tip-row">
-      <button type="button" class="btn-tip" id="tip-toggle-btn" onclick="toggleTip()">💡 Show Concept Tip / Formula</button>
-      <div class="tip-box" id="tip-box"></div>
+    <!-- STAGE 1: COST SORTER -->
+    <div id="sorter-view" class="sorter-arena hidden screen-fade">
+      <div class="section-eyebrow" id="sorter-progress">Stage 1: Cost Classifier • Item 1 of 6</div>
+      <h2 class="question-heading" style="margin-bottom:6px;">Classify this ledger item into the right cost bucket!</h2>
+
+      <div class="conveyor-track">
+        <div class="conveyor-card" id="conveyor-card">
+          <div class="item-tag">Incoming Expense Voucher</div>
+          <div class="item-name" id="sorter-item-name">Direct Materials</div>
+          <div class="item-amount" id="sorter-item-amt">RM 200,000</div>
+        </div>
+      </div>
+
+      <div class="bins-grid" id="bins-grid">
+        <button type="button" class="bin-btn" onclick="handleSortChoice('PRIME', this)">
+          <strong>1. Prime Cost</strong>
+          <span>Direct Materials &amp; Direct Labour</span>
+        </button>
+        <button type="button" class="bin-btn" onclick="handleSortChoice('MOH', this)">
+          <strong>2. Mfg Overhead</strong>
+          <span>Indirect Factory Costs</span>
+        </button>
+        <button type="button" class="bin-btn" onclick="handleSortChoice('PERIOD', this)">
+          <strong>3. Period Cost</strong>
+          <span>Selling &amp; Admin (Non-Mfg)</span>
+        </button>
+      </div>
+
+      <div class="feedback-toast" id="sorter-feedback" style="text-align:left;"></div>
+      <div class="action-row">
+        <button class="btn-primary hidden" id="sorter-next-btn" onclick="nextSorterItem()">Next Item →</button>
+      </div>
     </div>
 
-    <div class="options-stack" id="options-container"></div>
-    <div class="explanation-panel" id="feedback-box"></div>
+    <!-- STAGE 2 & 3: QUESTION ARENA -->
+    <div id="quiz-view" class="hidden screen-fade">
+      <div class="section-eyebrow" id="section-tag"></div>
+      <h2 class="question-heading" id="question-text"></h2>
+      <div id="ref-container"></div>
 
-    <div class="action-row">
-      <button class="btn-gold hidden" id="next-btn" onclick="nextQuestion()">Continue →</button>
+      <div class="tip-row">
+        <button type="button" class="btn-tip" id="tip-toggle-btn" onclick="toggleTip()">💡 Show Concept Tip / Formula</button>
+        <div class="tip-box" id="tip-box"></div>
+      </div>
+
+      <div class="options-stack" id="options-container"></div>
+      <div class="feedback-toast" id="feedback-box"></div>
+
+      <div class="action-row">
+        <button class="btn-primary hidden" id="next-btn" onclick="nextQuizStep()">Continue →</button>
+      </div>
     </div>
 
     <div class="footer-signature">
@@ -595,32 +998,28 @@
     </div>
   </div>
 
-  <!-- RESULT SCREEN -->
-  <div id="result-screen" class="hidden result-center">
-    <span class="pill-gold">✦ Assessment Completed</span>
-    <div class="trophy-score" id="final-score">10 / 10</div>
-    <p class="subtitle" id="final-message" style="max-width: 540px; margin: 0 auto 26px;"></p>
+  <!-- END / RESULT SCREEN -->
+  <div id="result-screen" class="hidden stage-banner screen-fade">
+    <div class="rank-pill" id="rank-title">🏆 CHIEF COST ACCOUNTANT</div>
+    <div class="big-pts" id="final-pts">2,450 PTS</div>
+    <p class="subtitle" id="final-msg" style="max-width:540px; margin:0 auto;"></p>
 
-    <div class="feature-grid" style="text-align: left;">
-      <div class="feature-box">
-        <strong>Prime Cost</strong>
-        <span>Direct Materials + Direct Labour (RM270,000)</span>
+    <div class="stats-row">
+      <div class="stat-box">
+        <strong id="stat-accuracy">100%</strong>
+        <span>Accuracy</span>
       </div>
-      <div class="feature-box">
-        <strong>Conversion Cost</strong>
-        <span>Direct Labour + Mfg Overhead (RM85,525)</span>
+      <div class="stat-box">
+        <strong id="stat-streak">8x</strong>
+        <span>Best Streak</span>
       </div>
-      <div class="feature-box">
-        <strong>Product Cost</strong>
-        <span>Total Manufacturing Cost (RM285,525)</span>
-      </div>
-      <div class="feature-box">
-        <strong>Period Cost</strong>
-        <span>Non-Manufacturing Cost (RM82,050)</span>
+      <div class="stat-box">
+        <strong id="stat-lives">5 ❤️</strong>
+        <span>Lives Left</span>
       </div>
     </div>
 
-    <button class="btn-gold" onclick="startQuiz()">Retake Assessment</button>
+    <button class="btn-primary" onclick="startGame()">Play Again ↻</button>
 
     <div class="footer-signature">
       Individual Assignment • Prepared by <strong>MUHAMMAD AMMAR IRFAN BIN ARIF</strong> (CLASS A5 • SESSION 2026/2027 • JOHOR MATRICULATION COLLEGE)<br>
@@ -630,6 +1029,75 @@
 </div>
 
 <script>
+// --- WEB AUDIO SYNTHESIZER (Zero external audio files needed) ---
+let soundEnabled = true;
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) audioCtx = new AudioContext();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+function playTone(freq, type, duration, delay = 0) {
+  if (!soundEnabled) return;
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+  gain.gain.setValueAtTime(0.14, audioCtx.currentTime + delay);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(audioCtx.currentTime + delay);
+  osc.stop(audioCtx.currentTime + delay + duration);
+}
+
+function sfxCorrect() {
+  playTone(587.33, 'sine', 0.14, 0);
+  playTone(880, 'sine', 0.24, 0.1);
+}
+
+function sfxWrong() {
+  playTone(200, 'sawtooth', 0.18, 0);
+  playTone(155, 'sawtooth', 0.25, 0.12);
+}
+
+function sfxVictory() {
+  playTone(523.25, 'triangle', 0.15, 0);
+  playTone(659.25, 'triangle', 0.15, 0.12);
+  playTone(783.99, 'triangle', 0.15, 0.24);
+  playTone(1046.50, 'triangle', 0.35, 0.36);
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('sound-toggle-start').textContent = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+  document.getElementById('sound-toggle-hud').textContent = soundEnabled ? '🔊' : '🔇';
+}
+
+function spawnPopup(text, isLoss = false) {
+  const popup = document.createElement('div');
+  popup.className = isLoss ? 'score-popup life-lost' : 'score-popup';
+  popup.textContent = text;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 920);
+}
+
+function pulseBadge(el) {
+  if (!el) return;
+  el.classList.remove('badge-pop');
+  void el.offsetWidth;
+  el.classList.add('badge-pop');
+}
+
+// --- GAME DATA ---
 const exampleDataHTML = `
   <div class="ref-box">
     <div class="ref-title">✦ Reference Data: Cost &amp; Expenses Schedule (RM)</div>
@@ -651,111 +1119,106 @@ const exampleDataHTML = `
   </div>
 `;
 
+const sorterPool = [
+  { name: "Assembly Line Wages", amount: "RM 70,000", target: "PRIME", reason: "Assembly line operators work directly on the product — classified as Direct Labour (Prime Cost)." },
+  { name: "Factory Supervisory Salaries", amount: "RM 1,700", target: "MOH", reason: "Factory supervision supports production indirectly — classified as Manufacturing Overhead." },
+  { name: "Sales Commission", amount: "RM 80,000", target: "PERIOD", reason: "Selling expense incurred outside the factory — classified as Non-Manufacturing (Period) Cost." },
+  { name: "Indirect Materials", amount: "RM 10,000", target: "MOH", reason: "Factory consumables that cannot be traced directly to one unit belong to Manufacturing Overhead." },
+  { name: "Direct Materials", amount: "RM 200,000", target: "PRIME", reason: "Raw materials traced directly to finished goods form the core of Prime Cost." },
+  { name: "Depreciation on Office Equipment", amount: "RM 400", target: "PERIOD", reason: "Administrative office depreciation is a Non-Manufacturing (Period) Cost." }
+];
+
 const conceptQuestions = [
   {
-    section: "Part I • 2.1 Importance of Cost Information",
-    tip: "💡 <strong>Tip (Management Functions):</strong> Maklumat kos membantu pihak pengurusan menjalankan 3 fungsi teras operasi: <strong>Planning</strong> (merancang), <strong>Directing</strong> (mengarah), dan <strong>Controlling</strong> (mengawal).",
-    question: "According to Section 2.1, what are the three core management functions supported by cost information?",
+    section: "Stage 2 • Concept Sprint (2.1 Management Functions)",
+    tip: "💡 <strong>Tip:</strong> Maklumat kos membantu pihak pengurusan menjalankan 3 fungsi utama: <strong>Planning</strong> (merancang), <strong>Directing</strong> (mengarah), dan <strong>Controlling</strong> (mengawal).",
+    question: "Which three core management functions are directly supported by cost information?",
     hasRef: false,
     options: [
+      "Planning, directing, and controlling operations",
       "Auditing, taxing, and liquidating assets",
       "Advertising, recruiting, and insuring buildings",
-      "Borrowing, lending, and issuing shares",
-      "Planning, directing, and controlling operations"
-    ],
-    correct: 3,
-    explanation: "Cost information empowers management to execute planning, directing, and controlling operations to optimise resources."
-  },
-  {
-    section: "Part I • 2.2 Differences Between Costs and Expenses",
-    tip: "💡 <strong>Tip (Cost vs Expense):</strong> <em>Cost</em> = pengorbanan sumber untuk aset yang beri manfaat masa hadapan (<em>capitalised as asset</em>, cth: mesin). <em>Expense</em> = kos yang telah digunakan untuk jana hasil dalam tempoh semasa (cth: bil utiliti, gaji, iklan).",
-    question: "What is the fundamental distinction between 'Costs' and 'Expenses'?",
-    hasRef: false,
-    options: [
-      "Costs provide future economic benefits (capitalised as assets), while expenses generate benefits within the current accounting period.",
-      "Costs are reported in the Statement of Profit or Loss, while expenses are capitalised as assets.",
-      "Costs apply solely to non-manufacturing entities, while expenses apply exclusively to factories.",
-      "Both terms share identical accounting treatment and are used interchangeably."
+      "Borrowing, lending, and issuing shares"
     ],
     correct: 0,
-    explanation: "Costs represent resources sacrificed to acquire assets with future economic benefits (e.g., machinery), whereas expenses generate benefits within the current period (e.g., utilities, salaries, advertising)."
+    explanation: "Cost information empowers management to plan, direct, and control business operations effectively."
   },
   {
-    section: "Part I • 2.3 Cost Classification — Function",
-    tip: "💡 <strong>Tip (Conversion Cost / Kos Penukaran):</strong> Kos yang digunakan untuk <em>menukar bahan mentah (raw materials) menjadi barang siap (finished goods)</em>. Formulanya ialah gabungan dua kos penukaran utama: <strong>Direct Labour + Manufacturing Overhead</strong>.",
-    question: "Which components constitute 'Conversion Costs'?",
+    section: "Stage 2 • Concept Sprint (2.2 Cost vs Expense)",
+    tip: "💡 <strong>Tip:</strong> <em>Cost</em> = aset yang beri manfaat masa hadapan (<em>capitalised</em>). <em>Expense</em> = kos yang telah digunakan untuk jana hasil dalam tempoh semasa.",
+    question: "What distinguishes a 'Cost' from an 'Expense' in accounting?",
     hasRef: false,
     options: [
-      "Direct Materials + Direct Labour",
+      "Costs provide future economic benefits (capitalised as assets), whereas expenses are expired costs generating current-period revenue.",
+      "Costs appear only in the Statement of Profit or Loss, whereas expenses are capitalised on the balance sheet.",
+      "Costs apply strictly to retail businesses, while expenses apply only to factories.",
+      "There is no accounting distinction between costs and expenses."
+    ],
+    correct: 0,
+    explanation: "Costs represent resources sacrificed for future benefits (e.g., machinery), while expenses generate benefits within the current period."
+  },
+  {
+    section: "Stage 2 • Concept Sprint (2.3 Conversion Cost)",
+    tip: "💡 <strong>Tip:</strong> <strong>Conversion Cost</strong> menukar bahan mentah kepada barang siap: <strong>Direct Labour + Manufacturing Overhead</strong>.",
+    question: "Which formula accurately computes 'Conversion Costs'?",
+    hasRef: false,
+    options: [
       "Direct Labour + Manufacturing Overhead",
+      "Direct Materials + Direct Labour",
       "Direct Materials + Manufacturing Overhead",
-      "Selling Expenses + Administration Expenses"
+      "Selling Expenses + Administrative Expenses"
     ],
-    correct: 1,
-    explanation: "Conversion costs are incurred to convert raw materials into finished goods: Direct Labour + Manufacturing Overhead."
+    correct: 0,
+    explanation: "Conversion Costs = Direct Labour + Manufacturing Overhead."
   },
   {
-    section: "Part I • 2.3 Cost Classification — Behaviour",
-    tip: "💡 <strong>Tip (Fixed Cost Behaviour):</strong> Dalam <em>relevant range</em>, jumlah keseluruhan <strong>Total Fixed Cost</strong> sentiasa tetap (<em>constant</em>) walau pengeluaran naik atau turun — tetapi <strong>Fixed Cost per unit</strong> akan menurun bila output bertambah (hubungan songsang / <em>inverse</em>).",
-    question: "How does a 'Fixed Cost' behave when production activity fluctuates?",
+    section: "Stage 2 • Concept Sprint (2.3 Fixed Cost Behaviour)",
+    tip: "💡 <strong>Tip:</strong> Dalam <em>relevant range</em>, <strong>Total Fixed Cost</strong> kekal sama, manakala <strong>Fixed Cost per unit</strong> menurun bila pengeluaran naik.",
+    question: "Within the relevant range, how does a 'Fixed Cost' behave when output volume increases?",
     hasRef: false,
     options: [
-      "Total fixed cost varies directly with output, while fixed cost per unit stays constant.",
-      "Total fixed cost remains constant, while fixed cost per unit changes inversely with activity.",
-      "Both total fixed cost and fixed cost per unit remain unchanged at all volume levels.",
-      "Total fixed cost contains both variable and fixed elements."
+      "Total fixed cost stays constant, while fixed cost per unit decreases.",
+      "Total fixed cost increases proportionally, while fixed cost per unit stays constant.",
+      "Both total fixed cost and fixed cost per unit increase together.",
+      "Total fixed cost drops to zero once break-even is reached."
     ],
-    correct: 1,
-    explanation: "Total fixed cost remains constant within the relevant range, meaning fixed cost per unit decreases as activity increases (inverse relationship)."
-  },
-  {
-    section: "Part I • 2.3 Other Classification — Direct vs Indirect",
-    tip: "💡 <strong>Tip (Indirect Costs):</strong> Kos tidak langsung yang <em>tidak boleh dikesan terus</em> (cannot be traced) kepada satu produk tertentu. Terbahagi kepada <strong>Indirect Manufacturing (MOH)</strong> dan <strong>Indirect Non-Manufacturing (Period Costs)</strong>.",
-    question: "Which statement accurately defines 'Indirect Costs'?",
-    hasRef: false,
-    options: [
-      "Costs directly involved in production such as direct materials and direct labour.",
-      "An alternative accounting term for Prime Costs.",
-      "Costs that cannot be traced to a cost object and are divided into indirect manufacturing and indirect non-manufacturing costs.",
-      "Costs that are always recorded as non-current assets on the balance sheet."
-    ],
-    correct: 2,
-    explanation: "Indirect costs cannot be traced directly to a single cost object and comprise Manufacturing Overhead (indirect manufacturing) and Period Costs (indirect non-manufacturing)."
+    correct: 0,
+    explanation: "Total fixed cost remains constant in total, so spreading it over more units lowers the fixed cost per unit."
   }
 ];
 
-const connectedQuestions = [
+const bossQuestions = [
   {
-    section: "Part II (Connected Case 1/5) • 2.4 Worked Example 1 — Prime Costs",
-    tip: "💡 <strong>Tip (Prime Cost / Kos Prima):</strong> Kos utama pengeluaran yang boleh dikesan terus kepada produk. Formula: <strong>Prime Cost = Direct Materials + Direct Labour</strong> (<em>Assembly Line Wages</em> ialah Direct Labour; abaikan <em>Indirect Materials</em>).",
-    question: "Based on the cost schedule below, calculate the Total Prime Cost:",
+    section: "Stage 3 • RM Ledger Boss (1/5: Prime Cost)",
+    tip: "💡 <strong>Tip:</strong> <strong>Prime Cost = Direct Materials + Direct Labour</strong> (<em>Assembly Line Wages</em>). Jangan masukkan <em>Indirect Materials</em>!",
+    question: "Audit Step 1: Calculate the Total Prime Cost from the schedule below:",
     hasRef: true,
     options: ["RM270,000", "RM280,000", "RM85,525", "RM285,525"],
     correct: 0,
-    explanation: "Prime Cost = Direct Materials (RM200,000) + Direct Labour / Assembly Line Wages (RM70,000) = RM270,000."
+    explanation: "Prime Cost = Direct Materials (RM200,000) + Assembly Line Wages (RM70,000) = RM270,000."
   },
   {
-    section: "Part II (Connected Case 2/5) • 2.4 Worked Example 1 — Manufacturing Overhead",
-    tip: "💡 <strong>Tip (Manufacturing Overhead / MOH):</strong> Campurkan semua kos berkaitan <strong>kilang (Factory)</strong> dan <strong>Indirect Materials</strong> — tetapi <em>JANGAN</em> masukkan Direct Materials, Assembly Line Wages, atau kos pejabat/jualan (Office, Advertising, Sales Commission).",
-    question: "Based on the cost schedule below, calculate the Total Manufacturing Overhead (Indirect Manufacturing Costs):",
+    section: "Stage 3 • RM Ledger Boss (2/5: Manufacturing Overhead)",
+    tip: "💡 <strong>Tip:</strong> Campurkan semua item <strong>Factory</strong> + <strong>Indirect Materials</strong> sahaja.",
+    question: "Audit Step 2: Calculate the Total Manufacturing Overhead (Indirect Manufacturing Costs):",
     hasRef: true,
-    options: ["RM10,000", "RM15,525", "RM85,525", "RM82,050"],
-    correct: 1,
-    explanation: "Factory Equipment Rent (1,500) + Factory Building Insurance (500) + Factory Utilities (800) + Indirect Materials (10,000) + Factory Property Taxes (125) + Factory Supervisory Salaries (1,700) + Depreciation on Factory Building (900) = RM15,525."
+    options: ["RM15,525", "RM10,000", "RM85,525", "RM82,050"],
+    correct: 0,
+    explanation: "Factory Rent (1,500) + Factory Insurance (500) + Factory Utilities (800) + Indirect Materials (10,000) + Factory Taxes (125) + Supervisory Salaries (1,700) + Factory Dep. (900) = RM15,525."
   },
   {
-    section: "Part II (Connected Case 3/5) • 2.4 Worked Example 1 — Conversion Costs",
-    tip: "💡 <strong>Tip (Conversion Cost):</strong> Formula: <strong>Direct Labour (Assembly Line Wages) + Total Manufacturing Overhead</strong>. Gunakan jumlah MOH (RM15,525) dari soalan sebelum ini dan tambah dengan Assembly Line Wages (RM70,000).",
-    question: "Based on the cost schedule below, calculate the Total Conversion Cost:",
+    section: "Stage 3 • RM Ledger Boss (3/5: Conversion Cost)",
+    tip: "💡 <strong>Tip:</strong> <strong>Conversion Cost = Direct Labour (RM70,000) + Manufacturing Overhead (RM15,525)</strong>.",
+    question: "Audit Step 3: Calculate the Total Conversion Cost:",
     hasRef: true,
-    options: ["RM270,000", "RM285,525", "RM85,525", "RM15,525"],
-    correct: 2,
+    options: ["RM85,525", "RM270,000", "RM285,525", "RM15,525"],
+    correct: 0,
     explanation: "Conversion Cost = Assembly Line Wages (RM70,000) + Manufacturing Overhead (RM15,525) = RM85,525."
   },
   {
-    section: "Part II (Connected Case 4/5) • 2.5 Worked Example 2 — Non-Manufacturing Costs",
-    tip: "💡 <strong>Tip (Non-Manufacturing Costs):</strong> Semua perbelanjaan di luar kilang — iaitu <strong>Selling Expenses</strong> (Advertising, Sales Commission) + <strong>Administrative Expenses</strong> (Office Supplies, Depreciation on Office Equipment).",
-    question: "Based on the cost schedule below, what is the Total Non-Manufacturing (Period) Cost?",
+    section: "Stage 3 • RM Ledger Boss (4/5: Non-Manufacturing Cost)",
+    tip: "💡 <strong>Tip:</strong> Campurkan <strong>Office Supplies + Dep. Office Equipment + Advertising + Sales Commission</strong>.",
+    question: "Audit Step 4: Calculate the Total Non-Manufacturing (Period) Cost:",
     hasRef: true,
     options: [
       "RM82,050 (Office Supplies 400 + Dep. Office Equip 400 + Advertising 1,250 + Sales Commission 80,000)",
@@ -764,12 +1227,12 @@ const connectedQuestions = [
       "RM151,250 (Assembly Line Wages 70,000 + Advertising 1,250 + Sales Commission 80,000)"
     ],
     correct: 0,
-    explanation: "Non-manufacturing costs encompass selling and administrative expenses: 400 + 400 + 1,250 + 80,000 = RM82,050."
+    explanation: "Period Costs = 400 + 400 + 1,250 + 80,000 = RM82,050."
   },
   {
-    section: "Part II (Connected Case 5/5) • 2.8 Product Costs and Period Costs",
-    tip: "💡 <strong>Tip (Product Cost vs Period Cost):</strong> <strong>Product Cost</strong> = Direct Materials + Direct Labour + Manufacturing Overhead, dan dilaporkan dalam <em>Statement of Cost of Goods Manufactured (COGM)</em>. <strong>Period Cost</strong> pula masuk ke <em>Statement of Profit or Loss</em>.",
-    question: "Based on the schedule below, what is the Total Product Cost (Manufacturing Cost) and where is it reported?",
+    section: "Stage 3 • RM Ledger Boss (5/5: Product Cost & Statement)",
+    tip: "💡 <strong>Tip:</strong> <strong>Product Cost</strong> = Direct Materials + Direct Labour + MOH, dan dilaporkan dalam <em>Statement of Cost of Goods Manufactured (COGM)</em>.",
+    question: "Final Audit Step 5: What is the Total Product Cost and where is it reported?",
     hasRef: true,
     options: [
       "RM285,525 — reported in the Statement of Cost of Goods Manufactured.",
@@ -778,20 +1241,35 @@ const connectedQuestions = [
       "RM270,000 — reported exclusively in the Statement of Financial Position."
     ],
     correct: 0,
-    explanation: "Total Product Costs = Direct Materials (200,000) + Assembly Line Wages (70,000) + Manufacturing Overhead (15,525) = RM285,525, reported in the Statement of Cost of Goods Manufactured."
+    explanation: "Total Product Cost = 200,000 + 70,000 + 15,525 = RM285,525, reported in the Statement of Cost of Goods Manufactured."
   }
 ];
 
-let sessionQuestions = [];
-let current = 0;
+// --- GAME STATE ---
+const MAX_LIVES = 5;
 let score = 0;
+let lives = MAX_LIVES;
+let streak = 0;
+let bestStreak = 0;
+let totalAnswered = 0;
+let totalCorrect = 0;
+
+let stage = 1; // 1 = Sorter, 2 = Concept, 3 = Boss
+let sorterItems = [];
+let sorterIdx = 0;
+let quizQueue = [];
+let quizIdx = 0;
 let currentCorrectIdx = 0;
+
+let timerInterval = null;
+let timeLeft = 100;
+let questionLocked = false;
 
 function cryptoRandomInt(max) {
   if (window.crypto && window.crypto.getRandomValues) {
-    const array = new Uint32Array(1);
-    window.crypto.getRandomValues(array);
-    return array[0] % max;
+    const arr = new Uint32Array(1);
+    window.crypto.getRandomValues(arr);
+    return arr[0] % max;
   }
   return Math.floor(Math.random() * max);
 }
@@ -806,51 +1284,212 @@ function shuffleArray(arr) {
 }
 
 function prepareQuestion(q) {
-  const mappedOptions = q.options.map((text, idx) => ({
-    text,
-    isCorrect: idx === q.correct
-  }));
-  const shuffledOptions = shuffleArray(mappedOptions);
+  const mapped = q.options.map((text, idx) => ({ text, isCorrect: idx === q.correct }));
+  const shuffled = shuffleArray(mapped);
   return {
     ...q,
-    shuffledOptions,
-    correctIdx: shuffledOptions.findIndex(item => item.isCorrect)
+    shuffledOptions: shuffled,
+    correctIdx: shuffled.findIndex(x => x.isCorrect)
   };
 }
 
-function startQuiz() {
-  current = 0;
+function updateHUD() {
+  const stageEl = document.getElementById('hud-stage');
+  const heartsEl = document.getElementById('hud-hearts');
+  const comboEl = document.getElementById('hud-combo');
+  const scoreEl = document.getElementById('hud-score');
+
+  stageEl.textContent = `STAGE ${stage} / 3`;
+  const emptyLives = MAX_LIVES - lives;
+  heartsEl.textContent = lives > 0
+    ? `${'❤️'.repeat(lives)}${'🖤'.repeat(emptyLives)} (${lives}/${MAX_LIVES})`
+    : `💔 (0/${MAX_LIVES})`;
+  heartsEl.classList.toggle('low-life', lives > 0 && lives <= 2);
+
+  const mult = streak >= 4 ? '3x' : streak >= 2 ? '2x' : '1x';
+  comboEl.textContent = `🔥 ${mult} Combo (${streak})`;
+  comboEl.classList.toggle('hot', streak >= 2);
+  scoreEl.textContent = `${score.toLocaleString()} PTS`;
+}
+
+function startTimer(seconds, onTimeout) {
+  clearInterval(timerInterval);
+  timeLeft = 100;
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = '100%';
+  bar.classList.remove('danger');
+
+  const step = 100 / (seconds * 10);
+  timerInterval = setInterval(() => {
+    if (questionLocked) return;
+    timeLeft -= step;
+    if (timeLeft <= 30) bar.classList.add('danger');
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      bar.style.width = '0%';
+      clearInterval(timerInterval);
+      onTimeout();
+    } else {
+      bar.style.width = timeLeft + '%';
+    }
+  }, 100);
+}
+
+function awardPoints() {
+  streak++;
+  if (streak > bestStreak) bestStreak = streak;
+  totalCorrect++;
+  const mult = streak >= 4 ? 3 : streak >= 2 ? 2 : 1;
+  const speedBonus = Math.round(timeLeft * 0.8);
+  const gained = (100 + speedBonus) * mult;
+  score += gained;
+  sfxCorrect();
+  spawnPopup(`+${gained} PTS`, false);
+  updateHUD();
+  pulseBadge(document.getElementById('hud-score'));
+  pulseBadge(document.getElementById('hud-combo'));
+  return gained;
+}
+
+function penalizeMistake() {
+  streak = 0;
+  lives = Math.max(0, lives - 1);
+  sfxWrong();
+  spawnPopup(`-1 ❤️ (${lives}/${MAX_LIVES} left)`, true);
+  const shell = document.getElementById('game-shell');
+  shell.classList.remove('shake');
+  void shell.offsetWidth;
+  shell.classList.add('shake');
+  updateHUD();
+  pulseBadge(document.getElementById('hud-hearts'));
+}
+
+function startGame() {
+  initAudio();
   score = 0;
-  // Part I (Konsep) di atas, Part II (Soalan Berkait Pengiraan) di bahagian bawah, dan kotak jawapan sentiasa rawak!
-  const part1 = shuffleArray(conceptQuestions).map(prepareQuestion);
-  const part2 = connectedQuestions.map(prepareQuestion);
-  sessionQuestions = [...part1, ...part2];
+  lives = MAX_LIVES;
+  streak = 0;
+  bestStreak = 0;
+  totalAnswered = 0;
+  totalCorrect = 0;
+  stage = 1;
+
+  sorterItems = shuffleArray(sorterPool);
+  sorterIdx = 0;
 
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.add('hidden');
-  document.getElementById('quiz-screen').classList.remove('hidden');
-  renderQuestion();
+  document.getElementById('play-screen').classList.remove('hidden');
+
+  loadSorterStage();
 }
 
-function renderQuestion() {
-  const q = sessionQuestions[current];
+// --- STAGE 1 LOGIC ---
+function loadSorterStage() {
+  stage = 1;
+  updateHUD();
+  document.getElementById('quiz-view').classList.add('hidden');
+  document.getElementById('sorter-view').classList.remove('hidden');
+  renderSorterItem();
+}
+
+function renderSorterItem() {
+  questionLocked = false;
+  const item = sorterItems[sorterIdx];
+  document.getElementById('sorter-progress').textContent = `Stage 1: Cost Classifier • Item ${sorterIdx + 1} of ${sorterItems.length}`;
+  document.getElementById('sorter-item-name').textContent = item.name;
+  document.getElementById('sorter-item-amt').textContent = item.amount;
+
+  const card = document.getElementById('conveyor-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'conveyorSlide 0.38s cubic-bezier(0.22, 1, 0.36, 1)';
+
+  document.querySelectorAll('.bin-btn').forEach(btn => {
+    btn.disabled = false;
+    btn.classList.remove('bin-correct', 'bin-wrong');
+  });
+
+  const fb = document.getElementById('sorter-feedback');
+  fb.classList.remove('show');
+  document.getElementById('sorter-next-btn').classList.add('hidden');
+
+  startTimer(14, () => {
+    handleSortChoice('TIMEOUT', null);
+  });
+}
+
+function handleSortChoice(choice, btnEl) {
+  if (questionLocked) return;
+  questionLocked = true;
+  clearInterval(timerInterval);
+  totalAnswered++;
+
+  const item = sorterItems[sorterIdx];
+  const bins = document.querySelectorAll('.bin-btn');
+  const mapIdx = { PRIME: 0, MOH: 1, PERIOD: 2 };
+  bins.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('sorter-feedback');
+  if (choice === item.target) {
+    if (btnEl) btnEl.classList.add('bin-correct');
+    const pts = awardPoints();
+    fb.innerHTML = `<strong style="color:#059669">✦ Spot On (+${pts} PTS):</strong> ${item.reason}`;
+  } else {
+    if (btnEl) btnEl.classList.add('bin-wrong');
+    bins[mapIdx[item.target]].classList.add('bin-correct');
+    penalizeMistake();
+    const prefix = choice === 'TIMEOUT' ? `⏰ Time Up! (-1 ❤️ • ${lives}/${MAX_LIVES} left)` : `✦ Misclassified (-1 ❤️ • ${lives}/${MAX_LIVES} left):`;
+    fb.innerHTML = `<strong style="color:#e11d48">${prefix}</strong> ${item.reason}`;
+  }
+
+  const nextBtn = document.getElementById('sorter-next-btn');
+  nextBtn.textContent = lives <= 0 ? 'See Results →' : 'Next Item →';
+  fb.classList.add('show');
+  nextBtn.classList.remove('hidden');
+}
+
+function nextSorterItem() {
+  if (lives <= 0) {
+    endGame(false);
+    return;
+  }
+  sorterIdx++;
+  if (sorterIdx < sorterItems.length) {
+    renderSorterItem();
+  } else {
+    // Advance to Stage 2
+    stage = 2;
+    quizQueue = shuffleArray(conceptQuestions).map(prepareQuestion);
+    quizIdx = 0;
+    loadQuizStage();
+  }
+}
+
+// --- STAGE 2 & 3 LOGIC ---
+function loadQuizStage() {
+  updateHUD();
+  document.getElementById('sorter-view').classList.add('hidden');
+  document.getElementById('quiz-view').classList.remove('hidden');
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  questionLocked = false;
+  const q = quizQueue[quizIdx];
   currentCorrectIdx = q.correctIdx;
-  const num = String(current + 1).padStart(2, '0');
-  document.getElementById('q-counter').textContent = `Question ${num} / ${sessionQuestions.length}`;
-  document.getElementById('score-display').textContent = `Score: ${score}`;
-  document.getElementById('progress-bar').style.width = `${(current / sessionQuestions.length) * 100}%`;
+
   document.getElementById('section-tag').textContent = q.section;
   document.getElementById('question-text').textContent = q.question;
   document.getElementById('ref-container').innerHTML = q.hasRef ? exampleDataHTML : '';
 
   const tipBox = document.getElementById('tip-box');
-  const tipBtn = document.getElementById('tip-toggle-btn');
   tipBox.innerHTML = q.tip;
   tipBox.classList.remove('show');
-  tipBtn.textContent = '💡 Show Concept Tip / Formula';
+  document.getElementById('tip-toggle-btn').textContent = '💡 Show Concept Tip / Formula';
 
-  const feedback = document.getElementById('feedback-box');
-  feedback.classList.remove('show');
+  const fb = document.getElementById('feedback-box');
+  fb.classList.remove('show');
   document.getElementById('next-btn').classList.add('hidden');
 
   const container = document.getElementById('options-container');
@@ -860,20 +1499,29 @@ function renderQuestion() {
     const btn = document.createElement('button');
     btn.className = 'option-card';
     btn.innerHTML = `<span class="opt-badge">${letters[idx]}</span><span>${opt.text}</span>`;
-    btn.onclick = () => selectAnswer(idx);
+    btn.onclick = () => handleQuizAnswer(idx);
     container.appendChild(btn);
+  });
+
+  startTimer(stage === 3 ? 28 : 18, () => {
+    handleQuizAnswer(-1);
   });
 }
 
 function toggleTip() {
   const tipBox = document.getElementById('tip-box');
   const tipBtn = document.getElementById('tip-toggle-btn');
-  const isShown = tipBox.classList.toggle('show');
-  tipBtn.textContent = isShown ? '💡 Hide Concept Tip' : '💡 Show Concept Tip / Formula';
+  const shown = tipBox.classList.toggle('show');
+  tipBtn.textContent = shown ? '💡 Hide Concept Tip' : '💡 Show Concept Tip / Formula';
 }
 
-function selectAnswer(idx) {
-  const q = sessionQuestions[current];
+function handleQuizAnswer(idx) {
+  if (questionLocked) return;
+  questionLocked = true;
+  clearInterval(timerInterval);
+  totalAnswered++;
+
+  const q = quizQueue[quizIdx];
   const buttons = document.querySelectorAll('.option-card');
   buttons.forEach((btn, i) => {
     btn.disabled = true;
@@ -881,36 +1529,69 @@ function selectAnswer(idx) {
     if (i === idx && idx !== currentCorrectIdx) btn.classList.add('wrong');
   });
 
+  const fb = document.getElementById('feedback-box');
   if (idx === currentCorrectIdx) {
-    score++;
-    document.getElementById('score-display').textContent = `Score: ${score}`;
-  }
-
-  const feedback = document.getElementById('feedback-box');
-  feedback.innerHTML = `<strong style="color:${idx === currentCorrectIdx ? '#059669' : '#e11d48'}">${idx === currentCorrectIdx ? '✦ Correct:' : '✦ Incorrect:'}</strong> ${q.explanation}`;
-  feedback.classList.add('show');
-  document.getElementById('next-btn').classList.remove('hidden');
-  document.getElementById('progress-bar').style.width = `${((current + 1) / sessionQuestions.length) * 100}%`;
-}
-
-function nextQuestion() {
-  current++;
-  if (current < sessionQuestions.length) {
-    renderQuestion();
+    const pts = awardPoints();
+    fb.innerHTML = `<strong style="color:#059669">✦ Exact Match (+${pts} PTS):</strong> ${q.explanation}`;
   } else {
-    showResults();
+    penalizeMistake();
+    const label = idx === -1 ? `⏰ Time Up! (-1 ❤️ • ${lives}/${MAX_LIVES} left)` : `✦ Incorrect (-1 ❤️ • ${lives}/${MAX_LIVES} left):`;
+    fb.innerHTML = `<strong style="color:#e11d48">${label}</strong> ${q.explanation}`;
+  }
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = lives <= 0 ? 'See Results →' : 'Continue →';
+  fb.classList.add('show');
+  nextBtn.classList.remove('hidden');
+}
+
+function nextQuizStep() {
+  if (lives <= 0) {
+    endGame(false);
+    return;
+  }
+  quizIdx++;
+  if (quizIdx < quizQueue.length) {
+    renderQuizQuestion();
+  } else if (stage === 2) {
+    // Advance to Stage 3 (RM Ledger Boss)
+    stage = 3;
+    quizQueue = bossQuestions.map(prepareQuestion);
+    quizIdx = 0;
+    loadQuizStage();
+  } else {
+    endGame(true);
   }
 }
 
-function showResults() {
-  document.getElementById('quiz-screen').classList.add('hidden');
+function endGame(completed) {
+  clearInterval(timerInterval);
+  document.getElementById('play-screen').classList.add('hidden');
   document.getElementById('result-screen').classList.remove('hidden');
-  document.getElementById('final-score').textContent = `${score} / ${sessionQuestions.length}`;
-  const pct = Math.round((score / sessionQuestions.length) * 100);
-  document.getElementById('final-message').textContent =
-    pct === 100 ? "Distinction achieved — 100% mastery across all Topic 2 concepts and calculations." :
-    pct >= 70 ? `Commendable performance (${pct}%) — strong command of Cost Classifications & Components.` :
-    `Score: ${pct}%. Review the executive summary cards below and retake the assessment.`;
+
+  if (completed && lives > 0) sfxVictory();
+
+  const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+  document.getElementById('final-pts').textContent = `${score.toLocaleString()} PTS`;
+  document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
+  document.getElementById('stat-streak').textContent = `${bestStreak}x`;
+  document.getElementById('stat-lives').textContent = `${lives}/${MAX_LIVES} ❤️`;
+
+  let rank = '📘 JUNIOR COST CLERK';
+  let msg = 'Good effort! Review the concept tips and try again to clear all 3 factory stages.';
+  if (!completed || lives === 0) {
+    rank = '⚠️ FACTORY AUDIT HALTED (0 LIVES)';
+    msg = `All ${MAX_LIVES} lives were lost during the ledger audit. Hit Play Again to master every cost classification!`;
+  } else if (accuracy >= 90 && lives === MAX_LIVES) {
+    rank = '👑 GRAND MASTER COST CONTROLLER';
+    msg = `Flawless run with all ${MAX_LIVES} lives intact! Complete mastery of Topic 2 Cost Concepts, Classifications & RM Components.`;
+  } else if (accuracy >= 75) {
+    rank = '🏆 SENIOR MANAGEMENT ACCOUNTANT';
+    msg = 'Strong command across Conveyor Sorting, Cost Behaviour, and the RM Ledger Boss!';
+  }
+
+  document.getElementById('rank-title').textContent = rank;
+  document.getElementById('final-msg').textContent = msg;
 }
 </script>
 </body>
